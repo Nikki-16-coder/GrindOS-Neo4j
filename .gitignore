@@ -1,0 +1,32 @@
+# Environment & Secrets
+.env
+*.env
+*.env.local
+!.env.example
+!Backend/.env.example
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Node & Build artifacts
+dist/
+build/
+.vite/
+Frontend/dist/
+Frontend/node_modules/.vite/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

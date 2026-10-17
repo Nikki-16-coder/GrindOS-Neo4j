@@ -2,13 +2,15 @@ import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { api, ApiError } from "./api";
 import "./theme.css";
 
+import { CareerNavigatorView } from "./CareerNavigatorView.jsx";
+
 /* ============================================================
    Auth context — holds the JWT + current user, persisted to
    localStorage so a refresh doesn't log you out.
    ============================================================ */
 
 const AuthContext = createContext(null);
-const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext);
 
 function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("gos_token"));
@@ -183,6 +185,17 @@ function Navbar({ view, setView, hasRecommendation }) {
             onClick={() => setView("dashboard")}
           >
             DASHBOARD
+          </button>
+          <button
+            className={`gos-nav-btn ${view === "graph" ? "active" : ""}`}
+            onClick={() => setView("graph")}
+            style={{
+              borderColor: view === "graph" ? "var(--accent)" : "rgba(232, 172, 92, 0.4)",
+              color: view === "graph" ? "var(--accent)" : undefined,
+            }}
+          >
+            <span style={{ color: "#10b981", marginRight: 5 }}>●</span>
+            CAREER GRAPH
           </button>
           <button
             className={`gos-nav-btn ${
@@ -655,7 +668,7 @@ function RecommendationResult({ result, onRetake, onChoosePath, onResultUpdated 
   );
 }
 
-function Dashboard({ justSubmitted, refreshKey, onViewAnalysis, onGoRoadmap, onGoJobs, onGoInterview, onGoSkills, onGoAssessment }) {
+function Dashboard({ justSubmitted, refreshKey, onViewAnalysis, onGoRoadmap, onGoJobs, onGoInterview, onGoSkills, onGoAssessment, onGoGraph }) {
   const { user, token } = useAuth();
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState("");
@@ -724,6 +737,11 @@ function Dashboard({ justSubmitted, refreshKey, onViewAnalysis, onGoRoadmap, onG
           <span className="dash-stat-sub">
             {interview?.total ? `${interview.nailed}/${interview.total} nailed` : "Prep not generated"}
           </span>
+        </button>
+        <button className="dash-stat gos-panel" type="button" onClick={() => onGoGraph?.()} style={{ borderColor: "rgba(232, 172, 92, 0.35)" }}>
+          <span className="dash-stat-key" style={{ color: "var(--accent)" }}>● NEO4J GRAPH</span>
+          <span className="dash-stat-val" style={{ color: "#10b981" }}>AURA DB</span>
+          <span className="dash-stat-sub">Career Navigator &amp; Skill Gap</span>
         </button>
       </div>
 
@@ -3527,6 +3545,8 @@ function Shell() {
           <ResumeView />
         ) : view === "mock" ? (
           <MockInterviewView hasRecommendation={!!recommendation} />
+        ) : view === "graph" ? (
+          <CareerNavigatorView onGoRoadmap={() => setView("roadmap")} />
         ) : view === "admin" && user.role === "admin" ? (
           <AdminView />
         ) : (
@@ -3539,6 +3559,7 @@ function Shell() {
             onGoInterview={() => setView("interview")}
             onGoSkills={() => setView("skills")}
             onGoAssessment={() => setView("assessment")}
+            onGoGraph={() => setView("graph")}
           />
         )}
       </div>

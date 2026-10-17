@@ -294,6 +294,41 @@ export const api = {
 
   adminReorderQuestions: ({ token, ids }) =>
     request("/admin/questions/reorder", { method: "PUT", token, body: { ids } }),
+
+  // ---- Career Navigator & Neo4j Graph Intelligence ----
+
+  getGraphStatus: () => request("/graph/status"),
+
+  seedGraph: () => request("/graph/seed", { method: "POST" }),
+
+  getGraphCareers: () => request("/graph/careers"),
+
+  getCareerDetails: (careerId) => request(`/graph/careers/${careerId}`),
+
+  analyzeSkillGap: ({ token, careerId, customSkills }) =>
+    request("/graph/skill-gap", {
+      method: "POST",
+      token,
+      body: { career_id: careerId, custom_skills: customSkills || null },
+    }),
+
+  getGraphRoadmap: ({ token, careerId, studentId }) =>
+    request(`/graph/roadmap/${careerId}`, {
+      token,
+      query: studentId ? { student_id: studentId } : {},
+    }),
+
+  getGraphVisualization: ({ careerId, studentId }) =>
+    request(`/graph/visualize/${careerId}`, {
+      query: studentId ? { student_id: studentId } : {},
+    }),
+
+  syncGraphUser: ({ token, targetCareer, skills }) =>
+    request("/graph/sync-user", {
+      method: "POST",
+      token,
+      body: { target_career: targetCareer || null, skills: skills || null },
+    }),
 };
 
 export { API_BASE_URL };

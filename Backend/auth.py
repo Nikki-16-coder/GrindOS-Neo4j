@@ -52,6 +52,25 @@ def get_current_user(
     return user
 
 
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
+
+
+def get_optional_current_user(
+    token: str = Depends(oauth2_scheme_optional),
+    db: Session = Depends(get_db),
+) -> User | None:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        return db.query(User).filter(User.email == email).first()
+    except Exception:
+        return None
+
+
 def require_admin(current_user: User = Depends(get_current_user)):
     # role is read from the DB on every request (not from the JWT), so
     # demoting an admin takes effect immediately.

@@ -19,9 +19,10 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-# pool_pre_ping drops dead connections instead of failing the first request
-# after the DB has been idle.
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 

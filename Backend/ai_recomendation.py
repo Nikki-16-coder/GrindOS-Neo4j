@@ -12,8 +12,14 @@ from Backend.database import get_db
 from Backend.models import Assessment, Recommendation, User
 from Backend.auth import get_current_user
 
-load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+def get_gemini_client():
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return None
+    try:
+        return genai.Client(api_key=api_key)
+    except Exception:
+        return None
 
 router = APIRouter(prefix="/recommendations", tags=["Recommendations"])
 
@@ -51,6 +57,36 @@ Respond ONLY with valid JSON in this exact schema, no markdown, no extra text:
 """
 
 def generate_recommendation(answers: dict, feedback: str | None = None) -> dict:
+    client = get_gemini_client()
+    if not client:
+        # Fallback recommendations mapped to the Indian tech market
+        return {
+            "career_paths": [
+                {
+                    "title": "Full Stack Developer",
+                    "fit_reason": "Strong balance of user-facing interactive problem solving and foundational server logic.",
+                    "matching_skills": ["Git & Version Control", "JavaScript & ES6+", "HTML5 & Modern CSS"],
+                    "skill_gaps": ["React.js", "FastAPI", "SQL & Relational DBs", "Docker & Containers"],
+                    "example_roles": ["Full Stack Engineer", "Software Development Engineer (SDE-1)", "Web Platform Engineer"]
+                },
+                {
+                    "title": "AI & Machine Learning Engineer",
+                    "fit_reason": "High affinity for data-driven modeling, algorithmic experimentation, and intelligent agents.",
+                    "matching_skills": ["Python Core", "Data Structures & Algorithms"],
+                    "skill_gaps": ["NumPy & Pandas", "Scikit-Learn Machine Learning", "PyTorch Deep Learning", "Neo4j Graph Database & Cypher", "Vector Databases & GraphRAG"],
+                    "example_roles": ["AI Engineer", "MLOps Engineer", "Applied AI Specialist"]
+                },
+                {
+                    "title": "Backend & Distributed Systems Engineer",
+                    "fit_reason": "Preference for scalable server design, concurrency, database performance, and distributed services.",
+                    "matching_skills": ["Python Core", "Git & Version Control"],
+                    "skill_gaps": ["RESTful API Design", "PostgreSQL & SQLAlchemy", "Redis Caching", "Docker & Containers"],
+                    "example_roles": ["Backend Developer", "Distributed Systems Engineer", "API Platform Engineer"]
+                }
+            ],
+            "next_skill_to_learn": "React.js or FastAPI"
+        }
+
     prompt = RECOMMENDATION_PROMPT.format(
         answers=json.dumps(answers),
         feedback=feedback.strip() if feedback and feedback.strip() else "None provided.",

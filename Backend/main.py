@@ -1,4 +1,13 @@
 import os
+import sys
+from pathlib import Path
+
+# Ensure project root is in sys.path so running from inside Backend/ works
+_backend_dir = Path(__file__).resolve().parent
+_project_root = _backend_dir.parent
+for _p in [str(_project_root), str(_backend_dir)]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +17,7 @@ from Backend.ai_recomendation import router as recommendation_router
 from Backend.assessment import router as assessment_router
 from Backend.dashboard import router as dashboard_router
 from Backend.database import Base, engine
+from Backend.graph import router as graph_router
 from Backend.interview import router as interview_router
 from Backend.jobs import router as jobs_router
 from Backend.mock_interview import router as mock_interview_router
@@ -32,6 +42,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(graph_router)
 app.include_router(recommendation_router)
 app.include_router(assessment_router)
 app.include_router(router)
